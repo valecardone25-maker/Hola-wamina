@@ -11,7 +11,8 @@
             box-sizing: border-box;
         }
 
-        html, body {
+        html,
+        body {
             margin: 0;
             padding: 0;
             width: 100%;
@@ -26,60 +27,87 @@
             justify-content: center;
         }
 
-        .contenedor {
+        /*
+         * La imagen original tiene proporción 3:2.
+         * Ponemos la imagen y el botón dentro del mismo
+         * contenedor para que la posición del botón
+         * coincida también en celulares.
+         */
+        .pagina {
             position: relative;
-            width: 100vw;
-            height: 100vh;
+
+            width: min(100vw, 150vh);
+            height: min(100vh, 66.6667vw);
+
+            aspect-ratio: 3 / 2;
+
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #050505;
         }
 
         .foto {
+            position: absolute;
+
             width: 100%;
             height: 100%;
+
             object-fit: contain;
             display: block;
         }
 
-        /* Zona invisible sobre "ABRIR NUESTRA PLAYLIST" */
+
+        /*
+         * BOTÓN INVISIBLE DE SPOTIFY
+         *
+         * Esta zona queda exactamente encima del botón
+         * "♡ abrir nuestra playlist ♡" de la imagen.
+         */
         .boton-spotify {
             position: absolute;
 
-            /*
-              Ajustamos estas medidas para que coincidan
-              con el botón que aparece en nuestra imagen.
-            */
-            width: 25%;
-            height: 8%;
+            left: 40%;
+            top: 70.2%;
 
-            left: 37.5%;
-            top: 70.5%;
+            width: 28%;
+            height: 7.5%;
+
+            display: block;
 
             cursor: pointer;
+
+            background: rgba(255, 255, 255, 0);
+
             border-radius: 30px;
 
-            background: rgba(255,255,255,0);
+            z-index: 5;
 
-            transition: transform 0.2s ease,
-                        background 0.2s ease;
+            text-decoration: none;
         }
 
+
+        /*
+         * Pequeño efecto cuando se pasa el mouse.
+         * En celular no afecta.
+         */
         .boton-spotify:hover {
-            transform: scale(1.04);
-            background: rgba(255,255,255,0.08);
+            background: rgba(255, 255, 255, 0.08);
+            transform: scale(1.02);
         }
 
         .boton-spotify:active {
-            transform: scale(0.97);
+            transform: scale(0.98);
         }
 
-        /* Botón de música */
+
+        /*
+         * CONTROL DE MÚSICA
+         */
         .musica {
             position: fixed;
-            bottom: 18px;
+
             right: 18px;
+            bottom: 18px;
 
             width: 42px;
             height: 42px;
@@ -87,73 +115,101 @@
             border: none;
             border-radius: 50%;
 
-            background: rgba(255, 224, 145, 0.88);
+            background: rgba(255, 224, 145, 0.90);
+
             color: #3b2b12;
 
             font-size: 18px;
+
             cursor: pointer;
 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
 
-            z-index: 10;
+            z-index: 20;
+
+            transition: transform 0.2s ease;
         }
 
         .musica:hover {
             transform: scale(1.08);
         }
 
-        /* En celular */
-        @media (max-width: 700px) {
+        .musica:active {
+            transform: scale(0.95);
+        }
 
-            .boton-spotify {
-                width: 38%;
-                height: 8%;
 
-                left: 31%;
-                top: 70%;
-            }
+        /*
+         * En pantallas muy chicas dejamos un poco más
+         * de espacio para el botón de música.
+         */
+        @media (max-width: 600px) {
 
             .musica {
-                bottom: 12px;
+                width: 40px;
+                height: 40px;
+
                 right: 12px;
+                bottom: 12px;
+
+                font-size: 17px;
             }
         }
     </style>
 </head>
 
+
 <body>
 
-    <div class="contenedor">
+    <!-- PÁGINA -->
+    <div class="pagina">
 
+        <!-- IMAGEN -->
         <img
             src="foto.jpg"
             class="foto"
             alt=""
         >
 
-        <!-- Zona invisible que hace clickeable el botón -->
+
+        <!--
+            BOTÓN INVISIBLE
+
+            Al tocar esta zona se abre directamente
+            la playlist de Spotify.
+        -->
         <a
-            class="boton-spotify"
             href="https://open.spotify.com/playlist/00ttMyO5V3gLdmmTlZ4Ys2"
             target="_blank"
+            rel="noopener noreferrer"
+            class="boton-spotify"
             aria-label="Abrir nuestra playlist">
         </a>
 
     </div>
 
 
-    <!-- Audio -->
-    <audio id="audio" loop>
-        <source src="petal.mp3" type="audio/mpeg">
+    <!-- AUDIO -->
+    <audio
+        id="audio"
+        loop
+        preload="auto">
+
+        <source
+            src="petal.mp3"
+            type="audio/mpeg">
+
     </audio>
 
 
-    <!-- Botón pequeño para activar/desactivar música -->
+    <!-- BOTÓN DE MÚSICA -->
     <button
         class="musica"
         id="musica"
         aria-label="Reproducir música">
+
         ▶
+
     </button>
 
 
@@ -165,18 +221,23 @@
         let reproduciendo = false;
 
 
+        /*
+         * INICIAR MÚSICA
+         */
         function reproducir() {
 
             audio.play()
                 .then(() => {
 
                     reproduciendo = true;
+
                     botonMusica.textContent = "Ⅱ";
 
                 })
                 .catch(() => {
 
                     reproduciendo = false;
+
                     botonMusica.textContent = "▶";
 
                 });
@@ -184,6 +245,9 @@
         }
 
 
+        /*
+         * PAUSAR MÚSICA
+         */
         function pausar() {
 
             audio.pause();
@@ -191,10 +255,20 @@
             reproduciendo = false;
 
             botonMusica.textContent = "▶";
+
         }
 
 
-        botonMusica.addEventListener("click", function() {
+        /*
+         * BOTÓN DE MÚSICA
+         */
+        botonMusica.addEventListener("click", function(event) {
+
+            /*
+             * Evitamos que este click se propague
+             * al resto de la página.
+             */
+            event.stopPropagation();
 
             if (reproduciendo) {
 
@@ -210,8 +284,11 @@
 
 
         /*
-         * Intentamos iniciar la canción automáticamente.
-         * Algunos navegadores pueden bloquear el autoplay.
+         * INTENTAR AUTOPLAY
+         *
+         * Algunos navegadores lo permitirán.
+         * Si no lo permiten, el primer toque de la
+         * pantalla iniciará la canción.
          */
         window.addEventListener("load", function() {
 
@@ -221,9 +298,10 @@
 
 
         /*
-         * Si el navegador bloqueó el autoplay,
-         * el primer toque/click en la página intenta
-         * iniciar la canción.
+         * PRIMER TOQUE EN LA PÁGINA
+         *
+         * Esto permite que la canción empiece aunque
+         * Chrome/Safari haya bloqueado el autoplay.
          */
         document.addEventListener("click", function() {
 
@@ -233,7 +311,10 @@
 
             }
 
-        }, { once: true });
+        }, {
+            once: true
+        });
+
 
     </script>
 
